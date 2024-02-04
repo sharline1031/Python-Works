@@ -1,0 +1,75 @@
+# 讀取資料
+from google.colab import drive
+import pandas as pd
+drive.mount('/content/gdrive')
+train_data = pd.read_csv('/content/gdrive/My Drive/train.csv')
+test_data = pd.read_csv('/content/gdrive/My Drive/test.csv')
+# visualization
+import seaborn as sns
+import matplotlib.pyplot as plt
+%matplotlib inline
+# data analysis and wrangling
+import pandas as pd
+import numpy as np
+import random as rnd
+# machine learning
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC, LinearSVC
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import Perceptron
+from sklearn.linear_model import SGDClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.svm import SVC
+from subprocess import check_output
+
+# 印出train_data
+train_data
+# train_data基礎資訊
+train_data.info()
+print("="*40)
+# 判斷各欄位的空值數量
+print("---各欄位的空值數量---")
+train_data.isna().sum()
+# Cabin的空值大於一半，沒有參考價值
+# 可以刪掉
+train_data = train_data.drop(['Cabin'], axis = 1)
+train_data
+# 將平均年齡補進去
+df_age = pd.DataFrame(train_data['Age'].fillna(train_data['Age'].mean()))
+merge_df = [[df_age,train_data]]
+# train_data的統計資料
+print("----train_data的統計資料----")
+train_data.describe()
+# 性別和存活率的比較
+print(train_data[["Sex", "Survived"]].groupby(["Sex"]).mean())
+
+# 比較艙等、上船地點、性別、有無人同行、有無小孩同行和存活率的關係
+# 先結合這些欄位
+train_combine = train_data[['Survived','Sex',"Pclass",'Age','SibSp','Parch','Embarked']]
+train_combine
+# 做出表格
+
+items = ['Pclass','SibSp','Parch','Embarked']
+for item in items:
+  print("="*20)
+  print(item + "_Groupby")
+
+  print(train_data[["Survived", "Sex", item]].groupby(["Sex", item]).mean().sort_values(by="Survived",ascending = False))
+
+  sns.countplot(data = train_data, x=train_data[item], hue=train_data['Survived'])
+  train_data[["Survived", "Sex", item]].groupby(["Sex", item]).mean()
+
+
+women = train_data.loc[train_data.Sex == 'female']["Survived"]
+rate_women = sum(women)/len(women)
+
+print("% of women who survived:", rate_women)
+
+sns.set_theme(style="dark")
+corr = train_data.corr()
+
+#numerical value
+# Fare 影響因素最高
+sns.heatmap(train_data[["Pclass","SibSp","Parch","Fare","Age","Survived"]].corr(),annot=True, fmt = ".2f", cmap = "coolwarm", vmin=-1)
